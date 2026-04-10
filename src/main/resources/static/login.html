@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - HealthHub</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/login.css">
+</head>
+<body style="margin: 0; background: white;">
+    <div class="login-wrapper">
+        <!-- Left Side -->
+        <div class="login-left">
+            <div style="text-align: center; max-width: 400px;">
+                <h1>HealthHub</h1>
+                <p>Access your healthcare dashboard and manage your appointments with ease.</p>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <div class="feature-icon">🔐</div>
+                        <span>Secure and encrypted login</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <span>Manage appointments and records</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">👥</div>
+                        <span>Connect with healthcare professionals</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">⚡</div>
+                        <span>Fast and reliable access</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side -->
+        <div class="login-right">
+            <div class="login-form-wrapper">
+                <div class="login-form-header">
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to your HealthHub account</p>
+                </div>
+
+                <div id="loginAlert"></div>
+
+                <form id="loginForm">
+                    <div class="form-section">
+                        <div class="form-section-title">Credentials</div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label for="email">Email Address <span class="required">*</span></label>
+                                <input type="email" id="email" name="email" required placeholder="you@example.com">
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label for="password">Password <span class="required">*</span></label>
+                                <input type="password" id="password" name="password" required placeholder="Enter your password">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-button" id="loginBtn">Sign In</button>
+                </form>
+
+                <div class="signup-link">
+                    Don't have an account? <a href="/register.html">Create Account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const alertDiv = document.getElementById('loginAlert');
+            const loginBtn = document.getElementById('loginBtn');
+
+            // Validation
+            if (!email.includes('@')) {
+                showAlert(alertDiv, 'Please enter a valid email address', 'danger');
+                return;
+            }
+
+            if (!password) {
+                showAlert(alertDiv, 'Please enter your password', 'danger');
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.classList.add('loading');
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    showAlert(alertDiv, '✓ Login successful! Redirecting...', 'success');
+                    
+                    setTimeout(() => {
+                        if (data.user.role === 'PATIENT') {
+                            window.location.href = '/dashboard-patient.html';
+                        } else if (data.user.role === 'DOCTOR') {
+                            window.location.href = '/dashboard-doctor.html';
+                        } else {
+                            window.location.href = '/';
+                        }
+                    }, 1500);
+                } else {
+                    showAlert(alertDiv, `${data.message || 'Login failed'}`, 'danger');
+                    loginBtn.disabled = false;
+                    loginBtn.classList.remove('loading');
+                }
+            } catch (error) {
+                showAlert(alertDiv, `An error occurred: ${error.message}`, 'danger');
+                loginBtn.disabled = false;
+                loginBtn.classList.remove('loading');
+            }
+        });
+
+        function showAlert(element, message, type) {
+            element.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            element.classList.add('active');
+            setTimeout(() => {
+                element.classList.remove('active');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

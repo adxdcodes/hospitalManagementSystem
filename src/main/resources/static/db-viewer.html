@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB Database Viewer</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body {
+            background: #f5f5f5;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+        }
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: #0052cc;
+            transform: translateY(-2px);
+        }
+        button.secondary {
+            background: #6c757d;
+        }
+        button.secondary:hover {
+            background: #5a6268;
+        }
+        .data-section {
+            margin-bottom: 2rem;
+        }
+        .data-section h2 {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+        .json-display {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .empty {
+            color: #999;
+            font-style: italic;
+        }
+        .count-badge {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 20px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.9rem;
+            margin-left: 0.5rem;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+        .info-box {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 MongoDB Database Viewer</h1>
+        
+        <div class="info-box">
+            <strong>Instructions:</strong> Click the buttons below to view all data in MongoDB collections. 
+            This will help you verify if registration data is being saved correctly.
+        </div>
+
+        <div class="button-group">
+            <button onclick="loadUsers()">👤 Load All Users</button>
+            <button onclick="loadPatients()">💊 Load All Patients</button>
+            <button onclick="loadDoctors()">👨‍⚕️ Load All Doctors</button>
+            <button onclick="loadAppointments()">📅 Load All Appointments</button>
+            <button class="secondary" onclick="clearAll()">🗑️ Clear All Sections</button>
+        </div>
+
+        <div id="status"></div>
+
+        <div class="data-section">
+            <h2>👤 USERS <span class="count-badge" id="userCount">0</span></h2>
+            <div class="json-display" id="usersData">
+                <span class="empty">Click "Load All Users" to view data</span>
+            </div>
+        </div>
+
+        <div class="data-section">
+            <h2>💊 PATIENTS <span class="count-badge" id="patientCount">0</span></h2>
+            <div class="json-display" id="patientsData">
+                <span class="empty">Click "Load All Patients" to view data</span>
+            </div>
+        </div>
+
+        <div class="data-section">
+            <h2>👨‍⚕️ DOCTORS <span class="count-badge" id="doctorCount">0</span></h2>
+            <div class="json-display" id="doctorsData">
+                <span class="empty">Click "Load All Doctors" to view data</span>
+            </div>
+        </div>
+
+        <div class="data-section">
+            <h2>📅 APPOINTMENTS <span class="count-badge" id="appointmentCount">0</span></h2>
+            <div class="json-display" id="appointmentsData">
+                <span class="empty">Click "Load All Appointments" to view data</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const api = "http://localhost:8080";
+
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${api}/api/patients/all`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                
+                // Extract users from patients (hack to get user data)
+                document.getElementById('usersData').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('userCount').textContent = data.length;
+                showStatus(`✓ Loaded ${data.length} users`, 'success');
+            } catch (error) {
+                document.getElementById('usersData').textContent = `Error: ${error.message}`;
+                showStatus(`✗ Error loading users: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadPatients() {
+            try {
+                const response = await fetch(`${api}/api/patients/all`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                
+                document.getElementById('patientsData').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('patientCount').textContent = data.length;
+                showStatus(`✓ Loaded ${data.length} patients`, 'success');
+            } catch (error) {
+                document.getElementById('patientsData').textContent = `Error: ${error.message}`;
+                showStatus(`✗ Error loading patients: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadDoctors() {
+            try {
+                const response = await fetch(`${api}/api/doctors/all`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                
+                document.getElementById('doctorsData').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('doctorCount').textContent = data.length;
+                showStatus(`✓ Loaded ${data.length} doctors`, 'success');
+            } catch (error) {
+                document.getElementById('doctorsData').textContent = `Error: ${error.message}`;
+                showStatus(`✗ Error loading doctors: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadAppointments() {
+            try {
+                const response = await fetch(`${api}/api/appointments/all`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                
+                document.getElementById('appointmentsData').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('appointmentCount').textContent = data.length;
+                showStatus(`✓ Loaded ${data.length} appointments`, 'success');
+            } catch (error) {
+                document.getElementById('appointmentsData').textContent = `Error: ${error.message}`;
+                showStatus(`✗ Error loading appointments: ${error.message}`, 'error');
+            }
+        }
+
+        function clearAll() {
+            document.getElementById('usersData').innerHTML = '<span class="empty">Click "Load All Users" to view data</span>';
+            document.getElementById('patientsData').innerHTML = '<span class="empty">Click "Load All Patients" to view data</span>';
+            document.getElementById('doctorsData').innerHTML = '<span class="empty">Click "Load All Doctors" to view data</span>';
+            document.getElementById('appointmentsData').innerHTML = '<span class="empty">Click "Load All Appointments" to view data</span>';
+            document.getElementById('userCount').textContent = '0';
+            document.getElementById('patientCount').textContent = '0';
+            document.getElementById('doctorCount').textContent = '0';
+            document.getElementById('appointmentCount').textContent = '0';
+            document.getElementById('status').innerHTML = '';
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.innerHTML = `<div class="${type}">${message}</div>`;
+            setTimeout(() => {
+                status.innerHTML = '';
+            }, 5000);
+        }
+
+        // Auto-load on page load
+        window.addEventListener('load', () => {
+            loadPatients();
+            loadDoctors();
+        });
+    </script>
+</body>
+</html>

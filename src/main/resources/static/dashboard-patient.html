@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard - HealthHub</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">🏥 HealthHub</div>
+            <ul class="nav-links">
+                <li><a href="#dashboard">Dashboard</a></li>
+                <li><a href="#appointments">Appointments</a></li>
+                <li><a href="#doctors">Find Doctors</a></li>
+                <li><a href="#profile">Profile</a></li>
+            </ul>
+            <button class="btn btn-danger" onclick="logout()">Logout</button>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" id="dashboard">
+            <h1 id="welcomeMessage">Welcome, Patient!</h1>
+            <p>Manage your appointments and health information</p>
+        </section>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📅 Your Appointments</h3>
+                </div>
+                <button class="btn btn-primary" onclick="showAppointmentModal()">Book New Appointment</button>
+                <div id="appointmentsList" style="margin-top: 1rem;"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">👨‍⚕️ Find a Doctor</h3>
+                </div>
+                <input type="text" id="searchDoctor" placeholder="Search by specialization..." style="margin-bottom: 1rem;">
+                <div id="doctorsList"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📋 Your Profile</h3>
+                </div>
+                <div id="profileInfo"></div>
+                <button class="btn btn-secondary" onclick="showProfileModal()" style="margin-top: 1rem;">Edit Profile</button>
+            </div>
+        </div>
+
+        <!-- Appointment Modal -->
+        <div id="appointmentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+            <div style="background: white; margin: 5% auto; padding: 2rem; width: 90%; max-width: 500px; border-radius: 0.5rem;">
+                <h2>Book an Appointment</h2>
+                <form id="appointmentForm">
+                    <div class="form-group">
+                        <label for="appointmentDoctor">Select Doctor</label>
+                        <select id="appointmentDoctor" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentDate">Date</label>
+                        <input type="date" id="appointmentDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentTime">Time</label>
+                        <input type="time" id="appointmentTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentReason">Reason for Visit</label>
+                        <textarea id="appointmentReason" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success" style="width: 100%;">Book Appointment</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('appointmentModal')" style="width: 100%; margin-top: 0.5rem;">Cancel</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Profile Modal -->
+        <div id="profileModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;">
+            <div style="background: white; margin: 2% auto; padding: 2rem; width: 90%; max-width: 500px; border-radius: 0.5rem;">
+                <h2>Edit Your Profile</h2>
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="profileFullName">Full Name</label>
+                        <input type="text" id="profileFullName">
+                    </div>
+                    <div class="form-group">
+                        <label for="profilePhone">Phone</label>
+                        <input type="tel" id="profilePhone">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileGender">Gender</label>
+                        <select id="profileGender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileBloodGroup">Blood Group</label>
+                        <select id="profileBloodGroup">
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileAddress">Address</label>
+                        <input type="text" id="profileAddress">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileCity">City</label>
+                        <input type="text" id="profileCity">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileAllergies">Allergies</label>
+                        <textarea id="profileAllergies"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success" style="width: 100%;">Save Changes</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('profileModal')" style="width: 100%; margin-top: 0.5rem;">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 Hospital Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        let patientData = null;
+        let allDoctors = [];
+
+        function checkAuth() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user || user.role !== 'PATIENT') {
+                window.location.href = 'login.html';
+                return false;
+            }
+            return user;
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+
+        function showAppointmentModal() {
+            document.getElementById('appointmentModal').style.display = 'block';
+            loadDoctorsForBooking();
+        }
+
+        function showProfileModal() {
+            document.getElementById('profileModal').style.display = 'block';
+            loadPatientProfile();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        async function loadPatientProfile() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            try {
+                const response = await fetch(`/api/patients/user/${user.id}`);
+                const data = await response.json();
+                if (response.ok) {
+                    patientData = data;
+                    document.getElementById('welcomeMessage').textContent = `Welcome, ${data.fullName}!`;
+                    
+                    document.getElementById('profileFullName').value = data.fullName || '';
+                    document.getElementById('profilePhone').value = data.phone || '';
+                    document.getElementById('profileGender').value = data.gender || '';
+                    document.getElementById('profileBloodGroup').value = data.bloodGroup || '';
+                    document.getElementById('profileAddress').value = data.address || '';
+                    document.getElementById('profileCity').value = data.city || '';
+                    document.getElementById('profileAllergies').value = data.allergies || '';
+
+                    // Display profile info
+                    document.getElementById('profileInfo').innerHTML = `
+                        <p><strong>Name:</strong> ${data.fullName}</p>
+                        <p><strong>Email:</strong> ${data.email}</p>
+                        <p><strong>Phone:</strong> ${data.phone}</p>
+                        <p><strong>Blood Group:</strong> ${data.bloodGroup || 'Not specified'}</p>
+                        <p><strong>Gender:</strong> ${data.gender || 'Not specified'}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        async function loadAppointments() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            try {
+                const response = await fetch(`/api/patients/user/${user.id}`);
+                const patientData = await response.json();
+                
+                const appointmentsResponse = await fetch(`/api/appointments/patient/${patientData.id}`);
+                const appointments = await appointmentsResponse.json();
+
+                let appointmentsHTML = '';
+                if (appointments.length === 0) {
+                    appointmentsHTML = '<p style="color: var(--text-light);">No appointments yet. Book one now!</p>';
+                } else {
+                    appointmentsHTML = '<table><tr><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th><th>Action</th></tr>';
+                    appointments.forEach(apt => {
+                        appointmentsHTML += `
+                            <tr>
+                                <td>${apt.doctorId}</td>
+                                <td>${apt.appointmentDate}</td>
+                                <td>${apt.appointmentTime}</td>
+                                <td><span style="background: var(--light-bg); padding: 0.25rem 0.5rem; border-radius: 0.25rem;">${apt.status}</span></td>
+                                <td>
+                                    ${apt.status === 'SCHEDULED' ? `<button class="btn btn-danger" onclick="cancelAppointment('${apt.id}')" style="padding: 0.5rem; font-size: 0.9rem;">Cancel</button>` : ''}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    appointmentsHTML += '</table>';
+                }
+                document.getElementById('appointmentsList').innerHTML = appointmentsHTML;
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+            }
+        }
+
+        async function loadDoctors() {
+            try {
+                const response = await fetch('/api/doctors/active/all');
+                allDoctors = await response.json();
+                displayDoctors(allDoctors);
+            } catch (error) {
+                console.error('Error loading doctors:', error);
+            }
+        }
+
+        function displayDoctors(doctors) {
+            let doctorsHTML = '';
+            doctors.forEach(doctor => {
+                doctorsHTML += `
+                    <div class="card" style="margin-bottom: 1rem;">
+                        <h4>${doctor.fullName}</h4>
+                        <p><strong>Specialization:</strong> ${doctor.specialization}</p>
+                        <p><strong>Department:</strong> ${doctor.department}</p>
+                        <p><strong>Experience:</strong> ${doctor.experience}</p>
+                        <p><strong>Fee:</strong> $${doctor.consultationFee}</p>
+                        <button class="btn btn-primary" onclick="selectDoctorForBooking('${doctor.id}', '${doctor.fullName}')">Book Appointment</button>
+                    </div>
+                `;
+            });
+            document.getElementById('doctorsList').innerHTML = doctorsHTML;
+        }
+
+        async function loadDoctorsForBooking() {
+            try {
+                const response = await fetch('/api/doctors/active/all');
+                const doctors = await response.json();
+                let optionsHTML = '<option value="">-- Select a Doctor --</option>';
+                doctors.forEach(doctor => {
+                    optionsHTML += `<option value="${doctor.id}">${doctor.fullName} (${doctor.specialization})</option>`;
+                });
+                document.getElementById('appointmentDoctor').innerHTML = optionsHTML;
+            } catch (error) {
+                console.error('Error loading doctors:', error);
+            }
+        }
+
+        function selectDoctorForBooking(doctorId, doctorName) {
+            document.getElementById('appointmentDoctor').value = doctorId;
+            document.getElementById('appointmentModal').style.display = 'block';
+        }
+
+        async function cancelAppointment(appointmentId) {
+            if (confirm('Are you sure you want to cancel this appointment?')) {
+                try {
+                    const response = await fetch(`/api/appointments/cancel/${appointmentId}`, {
+                        method: 'PUT'
+                    });
+                    if (response.ok) {
+                        alert('Appointment cancelled successfully');
+                        loadAppointments();
+                    }
+                } catch (error) {
+                    console.error('Error cancelling appointment:', error);
+                }
+            }
+        }
+
+        document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = JSON.parse(localStorage.getItem('user'));
+            const patientResponse = await fetch(`/api/patients/user/${user.id}`);
+            const patientData = await patientResponse.json();
+
+            const appointmentData = {
+                patientId: patientData.id,
+                doctorId: document.getElementById('appointmentDoctor').value,
+                appointmentDate: document.getElementById('appointmentDate').value,
+                appointmentTime: document.getElementById('appointmentTime').value,
+                reason: document.getElementById('appointmentReason').value
+            };
+
+            try {
+                const response = await fetch('/api/appointments/book', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(appointmentData)
+                });
+                if (response.ok) {
+                    alert('Appointment booked successfully!');
+                    closeModal('appointmentModal');
+                    loadAppointments();
+                }
+            } catch (error) {
+                alert('Error booking appointment: ' + error.message);
+            }
+        });
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = JSON.parse(localStorage.getItem('user'));
+            const patientResponse = await fetch(`/api/patients/user/${user.id}`);
+            const existingPatient = await patientResponse.json();
+
+            const updateData = {
+                ...existingPatient,
+                fullName: document.getElementById('profileFullName').value,
+                phone: document.getElementById('profilePhone').value,
+                gender: document.getElementById('profileGender').value,
+                bloodGroup: document.getElementById('profileBloodGroup').value,
+                address: document.getElementById('profileAddress').value,
+                city: document.getElementById('profileCity').value,
+                allergies: document.getElementById('profileAllergies').value
+            };
+
+            try {
+                const response = await fetch(`/api/patients/${existingPatient.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+                if (response.ok) {
+                    alert('Profile updated successfully!');
+                    closeModal('profileModal');
+                    loadPatientProfile();
+                }
+            } catch (error) {
+                alert('Error updating profile: ' + error.message);
+            }
+        });
+
+        // Initialize
+        window.addEventListener('load', () => {
+            if (checkAuth()) {
+                loadPatientProfile();
+                loadAppointments();
+                loadDoctors();
+            }
+        });
+
+        // Search doctors
+        document.getElementById('searchDoctor')?.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = allDoctors.filter(doc => 
+                doc.specialization.toLowerCase().includes(query)
+            );
+            displayDoctors(filtered);
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target.id === 'appointmentModal') {
+                closeModal('appointmentModal');
+            }
+            if (e.target.id === 'profileModal') {
+                closeModal('profileModal');
+            }
+        });
+    </script>
+</body>
+</html>

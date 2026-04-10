@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - HealthHub</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">🏥 HealthHub</div>
+            <ul class="nav-links">
+                <li><a href="#dashboard">Dashboard</a></li>
+                <li><a href="#appointments">Appointments</a></li>
+                <li><a href="#profile">Profile</a></li>
+            </ul>
+            <button class="btn btn-danger" onclick="logout()">Logout</button>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" id="dashboard">
+            <h1 id="welcomeMessage">Welcome, Doctor!</h1>
+            <p>Manage your appointments and patient consultations</p>
+        </section>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📅 Scheduled Appointments</h3>
+                </div>
+                <div id="appointmentsList" style="margin-top: 1rem;"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📊 Statistics</h3>
+                </div>
+                <div id="statisticsInfo"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">👨‍⚕️ Your Profile</h3>
+                </div>
+                <div id="profileInfo"></div>
+                <button class="btn btn-secondary" onclick="showProfileModal()" style="margin-top: 1rem;">Edit Profile</button>
+            </div>
+        </div>
+
+        <!-- Profile Modal -->
+        <div id="profileModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;">
+            <div style="background: white; margin: 2% auto; padding: 2rem; width: 90%; max-width: 500px; border-radius: 0.5rem;">
+                <h2>Edit Your Profile</h2>
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="profileFullName">Full Name</label>
+                        <input type="text" id="profileFullName">
+                    </div>
+                    <div class="form-group">
+                        <label for="profilePhone">Phone</label>
+                        <input type="tel" id="profilePhone">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileSpecialization">Specialization</label>
+                        <input type="text" id="profileSpecialization">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileDepartment">Department</label>
+                        <input type="text" id="profileDepartment">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileExperience">Experience (Years)</label>
+                        <input type="text" id="profileExperience">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileConsultationFee">Consultation Fee ($)</label>
+                        <input type="number" id="profileConsultationFee" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="profileConsultationHours">Consultation Hours</label>
+                        <input type="text" id="profileConsultationHours" placeholder="e.g., 9:00 AM - 5:00 PM">
+                    </div>
+                    <button type="submit" class="btn btn-success" style="width: 100%;">Save Changes</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('profileModal')" style="width: 100%; margin-top: 0.5rem;">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 Hospital Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        let doctorData = null;
+
+        function checkAuth() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user || user.role !== 'DOCTOR') {
+                window.location.href = 'login.html';
+                return false;
+            }
+            return user;
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+
+        function showProfileModal() {
+            document.getElementById('profileModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        async function loadDoctorProfile() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            try {
+                const response = await fetch(`/api/doctors/user/${user.id}`);
+                const data = await response.json();
+                if (response.ok) {
+                    doctorData = data;
+                    document.getElementById('welcomeMessage').textContent = `Welcome, Dr. ${data.fullName}!`;
+                    
+                    document.getElementById('profileFullName').value = data.fullName || '';
+                    document.getElementById('profilePhone').value = data.phone || '';
+                    document.getElementById('profileSpecialization').value = data.specialization || '';
+                    document.getElementById('profileDepartment').value = data.department || '';
+                    document.getElementById('profileExperience').value = data.experience || '';
+                    document.getElementById('profileConsultationFee').value = data.consultationFee || '';
+                    document.getElementById('profileConsultationHours').value = data.consultationHours || '';
+
+                    // Display profile info
+                    document.getElementById('profileInfo').innerHTML = `
+                        <p><strong>Name:</strong> Dr. ${data.fullName}</p>
+                        <p><strong>Email:</strong> ${data.email}</p>
+                        <p><strong>Phone:</strong> ${data.phone}</p>
+                        <p><strong>Specialization:</strong> ${data.specialization}</p>
+                        <p><strong>Department:</strong> ${data.department}</p>
+                        <p><strong>Experience:</strong> ${data.experience}</p>
+                        <p><strong>Consultation Fee:</strong> $${data.consultationFee}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        async function loadAppointments() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            try {
+                const response = await fetch(`/api/doctors/user/${user.id}`);
+                const doctorData = await response.json();
+                
+                const appointmentsResponse = await fetch(`/api/appointments/doctor/${doctorData.id}`);
+                const appointments = await appointmentsResponse.json();
+
+                let appointmentsHTML = '';
+                if (appointments.length === 0) {
+                    appointmentsHTML = '<p style="color: var(--text-light);">No appointments scheduled.</p>';
+                } else {
+                    appointmentsHTML = '<table><tr><th>Patient ID</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th>Actions</th></tr>';
+                    appointments.forEach(apt => {
+                        appointmentsHTML += `
+                            <tr>
+                                <td>${apt.patientId.substring(0, 8)}...</td>
+                                <td>${apt.appointmentDate}</td>
+                                <td>${apt.appointmentTime}</td>
+                                <td>${apt.reason || 'General Consultation'}</td>
+                                <td><span style="background: var(--light-bg); padding: 0.25rem 0.5rem; border-radius: 0.25rem;">${apt.status}</span></td>
+                                <td>
+                                    ${apt.status === 'SCHEDULED' ? `
+                                        <button class="btn btn-success" onclick="completeAppointment('${apt.id}')" style="padding: 0.5rem; font-size: 0.8rem; margin-right: 0.25rem;">Complete</button>
+                                        <button class="btn btn-danger" onclick="cancelAppointment('${apt.id}')" style="padding: 0.5rem; font-size: 0.8rem;">Cancel</button>
+                                    ` : ''}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    appointmentsHTML += '</table>';
+                }
+                document.getElementById('appointmentsList').innerHTML = appointmentsHTML;
+
+                // Load statistics
+                loadStatistics(appointments);
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+            }
+        }
+
+        function loadStatistics(appointments) {
+            const scheduled = appointments.filter(a => a.status === 'SCHEDULED').length;
+            const completed = appointments.filter(a => a.status === 'COMPLETED').length;
+            const cancelled = appointments.filter(a => a.status === 'CANCELLED').length;
+
+            document.getElementById('statisticsInfo').innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div style="background: #dbeafe; padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                        <h4 style="color: #1e40af; font-size: 1.5rem;">${scheduled}</h4>
+                        <p style="color: var(--text-light);">Scheduled</p>
+                    </div>
+                    <div style="background: #d1fae5; padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                        <h4 style="color: #065f46; font-size: 1.5rem;">${completed}</h4>
+                        <p style="color: var(--text-light);">Completed</p>
+                    </div>
+                    <div style="background: #fee2e2; padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                        <h4 style="color: #7f1d1d; font-size: 1.5rem;">${cancelled}</h4>
+                        <p style="color: var(--text-light);">Cancelled</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function cancelAppointment(appointmentId) {
+            if (confirm('Are you sure you want to cancel this appointment?')) {
+                try {
+                    const response = await fetch(`/api/appointments/cancel/${appointmentId}`, {
+                        method: 'PUT'
+                    });
+                    if (response.ok) {
+                        alert('Appointment cancelled successfully');
+                        loadAppointments();
+                    }
+                } catch (error) {
+                    console.error('Error cancelling appointment:', error);
+                }
+            }
+        }
+
+        async function completeAppointment(appointmentId) {
+            try {
+                const response = await fetch(`/api/appointments/complete/${appointmentId}`, {
+                    method: 'PUT'
+                });
+                if (response.ok) {
+                    alert('Appointment marked as completed');
+                    loadAppointments();
+                }
+            } catch (error) {
+                console.error('Error completing appointment:', error);
+            }
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const updateData = {
+                ...doctorData,
+                fullName: document.getElementById('profileFullName').value,
+                phone: document.getElementById('profilePhone').value,
+                specialization: document.getElementById('profileSpecialization').value,
+                department: document.getElementById('profileDepartment').value,
+                experience: document.getElementById('profileExperience').value,
+                consultationFee: parseFloat(document.getElementById('profileConsultationFee').value),
+                consultationHours: document.getElementById('profileConsultationHours').value
+            };
+
+            try {
+                const response = await fetch(`/api/doctors/${doctorData.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+                if (response.ok) {
+                    alert('Profile updated successfully!');
+                    closeModal('profileModal');
+                    loadDoctorProfile();
+                }
+            } catch (error) {
+                alert('Error updating profile: ' + error.message);
+            }
+        });
+
+        // Initialize
+        window.addEventListener('load', () => {
+            if (checkAuth()) {
+                loadDoctorProfile();
+                loadAppointments();
+                // Refresh appointments every 30 seconds
+                setInterval(loadAppointments, 30000);
+            }
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target.id === 'profileModal') {
+                closeModal('profileModal');
+            }
+        });
+    </script>
+</body>
+</html>
