@@ -51,20 +51,76 @@ function formatTime(timeString) {
     return `${displayHour}:${minutes} ${ampm}`;
 }
 
-// Show notification
+// Show notification (Toast)
 function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
-    notification.className = `alert alert-${type}`;
+    
+    // Color schemes for different types
+    const colors = {
+        success: { bg: '#10b981', border: '#059669' },
+        danger: { bg: '#ef4444', border: '#dc2626' },
+        warning: { bg: '#f59e0b', border: '#d97706' },
+        info: { bg: '#3b82f6', border: '#2563eb' }
+    };
+    
+    const colorScheme = colors[type] || colors.info;
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: ${colorScheme.bg};
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 1.5;
+        border-left: 4px solid ${colorScheme.border};
+        animation: slideIn 0.3s ease-out;
+        max-width: 400px;
+        word-wrap: break-word;
+    `;
+    
     notification.textContent = message;
-    notification.style.position = 'fixed';
-    notification.style.top = '20px';
-    notification.style.right = '20px';
-    notification.style.zIndex = '2000';
-
     document.body.appendChild(notification);
-
+    
+    // Add animation
+    const style = document.createElement('style');
+    if (!document.getElementById('toastStyles')) {
+        style.id = 'toastStyles';
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
     setTimeout(() => {
-        notification.remove();
+        notification.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
     }, 3000);
 }
 

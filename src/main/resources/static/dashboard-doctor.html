@@ -30,7 +30,7 @@
                 <div class="card-header">
                     <h3 class="card-title">📅 Scheduled Appointments</h3>
                 </div>
-                <div id="appointmentsList" style="margin-top: 1rem;"></div>
+                <div id="appointmentsList" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;"></div>
             </div>
 
             <div class="card">
@@ -51,7 +51,7 @@
 
         <!-- Profile Modal -->
         <div id="profileModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;">
-            <div style="background: white; margin: 2% auto; padding: 2rem; width: 90%; max-width: 500px; border-radius: 0.5rem;">
+            <div style="background: white; margin: 2% auto; padding: 2rem; width: 90%; max-width: 500px; border-radius: 0.5rem; position: relative; max-height: 90vh; overflow-y: auto;">
                 <h2>Edit Your Profile</h2>
                 <form id="profileForm">
                     <div class="form-group">
@@ -168,16 +168,16 @@
                 if (appointments.length === 0) {
                     appointmentsHTML = '<p style="color: var(--text-light);">No appointments scheduled.</p>';
                 } else {
-                    appointmentsHTML = '<table><tr><th>Patient ID</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th>Actions</th></tr>';
+                    appointmentsHTML = '<table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;"><tr style="border-bottom: 2px solid #ddd;"><th style="padding: 0.75rem; text-align: left;">Patient ID</th><th style="padding: 0.75rem; text-align: left;">Date</th><th style="padding: 0.75rem; text-align: left;">Time</th><th style="padding: 0.75rem; text-align: left;">Reason</th><th style="padding: 0.75rem; text-align: left;">Status</th><th style="padding: 0.75rem; text-align: left;">Actions</th></tr>';
                     appointments.forEach(apt => {
                         appointmentsHTML += `
-                            <tr>
-                                <td>${apt.patientId.substring(0, 8)}...</td>
-                                <td>${apt.appointmentDate}</td>
-                                <td>${apt.appointmentTime}</td>
-                                <td>${apt.reason || 'General Consultation'}</td>
-                                <td><span style="background: var(--light-bg); padding: 0.25rem 0.5rem; border-radius: 0.25rem;">${apt.status}</span></td>
-                                <td>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 0.75rem;">${apt.patientId.substring(0, 8)}...</td>
+                                <td style="padding: 0.75rem;">${apt.appointmentDate}</td>
+                                <td style="padding: 0.75rem;">${apt.appointmentTime}</td>
+                                <td style="padding: 0.75rem;">${apt.reason || 'General Consultation'}</td>
+                                <td style="padding: 0.75rem;"><span style="background: var(--light-bg); padding: 0.25rem 0.5rem; border-radius: 0.25rem;">${apt.status}</span></td>
+                                <td style="padding: 0.75rem;">
                                     ${apt.status === 'SCHEDULED' ? `
                                         <button class="btn btn-success" onclick="completeAppointment('${apt.id}')" style="padding: 0.5rem; font-size: 0.8rem; margin-right: 0.25rem;">Complete</button>
                                         <button class="btn btn-danger" onclick="cancelAppointment('${apt.id}')" style="padding: 0.5rem; font-size: 0.8rem;">Cancel</button>
@@ -203,18 +203,18 @@
             const cancelled = appointments.filter(a => a.status === 'CANCELLED').length;
 
             document.getElementById('statisticsInfo').innerHTML = `
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-                    <div style="background: #dbeafe; padding: 1rem; border-radius: 0.5rem; text-align: center;">
-                        <h4 style="color: #1e40af; font-size: 1.5rem;">${scheduled}</h4>
-                        <p style="color: var(--text-light);">Scheduled</p>
+                <div style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem; scroll-behavior: smooth;">
+                    <div style="background: #dbeafe; padding: 1.5rem; border-radius: 0.5rem; text-align: center; min-width: 160px; flex-shrink: 0;">
+                        <h4 style="color: #1e40af; font-size: 1.8rem; margin: 0;">${scheduled}</h4>
+                        <p style="color: var(--text-light); margin: 0.5rem 0 0 0;">Scheduled</p>
                     </div>
-                    <div style="background: #d1fae5; padding: 1rem; border-radius: 0.5rem; text-align: center;">
-                        <h4 style="color: #065f46; font-size: 1.5rem;">${completed}</h4>
-                        <p style="color: var(--text-light);">Completed</p>
+                    <div style="background: #d1fae5; padding: 1.5rem; border-radius: 0.5rem; text-align: center; min-width: 160px; flex-shrink: 0;">
+                        <h4 style="color: #065f46; font-size: 1.8rem; margin: 0;">${completed}</h4>
+                        <p style="color: var(--text-light); margin: 0.5rem 0 0 0;">Completed</p>
                     </div>
-                    <div style="background: #fee2e2; padding: 1rem; border-radius: 0.5rem; text-align: center;">
-                        <h4 style="color: #7f1d1d; font-size: 1.5rem;">${cancelled}</h4>
-                        <p style="color: var(--text-light);">Cancelled</p>
+                    <div style="background: #fee2e2; padding: 1.5rem; border-radius: 0.5rem; text-align: center; min-width: 160px; flex-shrink: 0;">
+                        <h4 style="color: #7f1d1d; font-size: 1.8rem; margin: 0;">${cancelled}</h4>
+                        <p style="color: var(--text-light); margin: 0.5rem 0 0 0;">Cancelled</p>
                     </div>
                 </div>
             `;

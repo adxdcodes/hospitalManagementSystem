@@ -82,17 +82,16 @@
 
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-            const alertDiv = document.getElementById('loginAlert');
             const loginBtn = document.getElementById('loginBtn');
 
             // Validation
             if (!email.includes('@')) {
-                showAlert(alertDiv, 'Please enter a valid email address', 'danger');
+                showNotification('⚠️ Please enter a valid email address (e.g., email@example.com)', 'warning');
                 return;
             }
 
             if (!password) {
-                showAlert(alertDiv, 'Please enter your password', 'danger');
+                showNotification('⚠️ Password is required', 'warning');
                 return;
             }
 
@@ -110,11 +109,12 @@
 
                 const data = await response.json();
 
-                if (data.success) {
+                // Check response status, not the data.success string value
+                if (response.ok && data.success) {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     
-                    showAlert(alertDiv, '✓ Login successful! Redirecting...', 'success');
+                    showNotification('✅ Login successful! Redirecting...', 'success');
                     
                     setTimeout(() => {
                         if (data.user.role === 'PATIENT') {
@@ -126,24 +126,24 @@
                         }
                     }, 1500);
                 } else {
-                    showAlert(alertDiv, `${data.message || 'Login failed'}`, 'danger');
+                    // Always re-enable button on error
+                    let errorMessage = 'Login failed';
+                    if (data.message && data.message.toLowerCase().includes('invalid')) {
+                        errorMessage = '❌ Invalid email or password. Please try again.';
+                    } else if (data.message) {
+                        errorMessage = `❌ ${data.message}`;
+                    }
+                    showNotification(errorMessage, 'danger');
                     loginBtn.disabled = false;
                     loginBtn.classList.remove('loading');
                 }
             } catch (error) {
-                showAlert(alertDiv, `An error occurred: ${error.message}`, 'danger');
+                // Always re-enable button on error
+                showNotification(`❌ An error occurred: ${error.message}`, 'danger');
                 loginBtn.disabled = false;
                 loginBtn.classList.remove('loading');
             }
         });
-
-        function showAlert(element, message, type) {
-            element.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-            element.classList.add('active');
-            setTimeout(() => {
-                element.classList.remove('active');
-            }, 5000);
-        }
     </script>
 </body>
 </html>

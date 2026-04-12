@@ -1,9 +1,14 @@
 package com.hospitalManagement.hospital_management;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/health")
@@ -22,8 +27,8 @@ public class HealthController {
     public ResponseEntity<Map<String, String>> getDbStatus() {
         Map<String, String> response = new HashMap<>();
         response.put("database", "MongoDB");
-        response.put("connection", "using-mock-datastore");
-        response.put("message", "Currently using in-memory MockDataStore for development");
+        response.put("connection", "using-mongodb-atlas");
+        response.put("message", "Connected to MongoDB Atlas - Data persists across sessions");
         return ResponseEntity.ok(response);
     }
 

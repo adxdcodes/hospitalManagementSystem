@@ -333,48 +333,43 @@
           const password = document.getElementById("password").value;
           const confirmPassword =
             document.getElementById("confirmPassword").value;
-          const alertDiv = document.getElementById("registerAlert");
           const registerBtn = document.getElementById("registerBtn");
 
           console.log("Form values:", { role, fullName, email, phone });
 
           // Validation
           if (!role) {
-            showAlert(alertDiv, "Please select your role (Patient or Doctor)", "danger");
+            showNotification("⚠️ Please select your role (Patient or Doctor)", "warning");
             return;
           }
 
           if (!fullName) {
-            showAlert(alertDiv, "Please enter your full name", "danger");
+            showNotification("⚠️ Please enter your full name", "warning");
             return;
           }
 
           if (!email.includes("@")) {
-            showAlert(alertDiv, "Please enter a valid email address", "danger");
+            showNotification("⚠️ Please enter a valid email address", "warning");
             return;
           }
 
           if (!phone) {
-            showAlert(alertDiv, "Please enter your phone number", "danger");
+            showNotification("⚠️ Please enter your phone number", "warning");
             return;
           }
 
           if (!password) {
-            showAlert(alertDiv, "Please enter a password", "danger");
+            showNotification("⚠️ Please enter a password", "warning");
             return;
           }
 
           if (password !== confirmPassword) {
-            showAlert(alertDiv, "Passwords do not match!", "danger");
+            showNotification("⚠️ Passwords do not match!", "warning");
             return;
           }
 
           if (password.length < 6) {
-            showAlert(
-              alertDiv,
-              "Password must be at least 6 characters",
-              "danger",
-            );
+            showNotification("⚠️ Password must be at least 6 characters", "warning");
             return;
           }
 
@@ -401,12 +396,15 @@
             console.log("Auth registration response status:", registerResponse.status);
             const registerData = await registerResponse.json();
             console.log("Auth registration data:", registerData);
-            console.log("🔍 Full response object:", JSON.stringify(registerData, null, 2));
 
             if (!registerResponse.ok) {
               console.error("❌ API returned error status:", registerResponse.status);
-              console.error("❌ Error response:", registerData);
-              showAlert(alertDiv, `Registration failed: ${registerData.message || registerData.error || "Unknown error"}`, "danger");
+              // Provide specific error messages based on the reason
+              if (registerData.message && registerData.message.includes("already")) {
+                showNotification("❌ This email is already registered. Use a different email or try login.", "danger");
+              } else {
+                showNotification(`❌ Account creation failed: ${registerData.message || "Unknown error"}`, "danger");
+              }
               registerBtn.disabled = false;
               registerBtn.classList.remove("loading");
               return;
@@ -414,7 +412,8 @@
 
             if (registerData.success) {
               const userId = registerData.userId;
-              console.log("User created with ID:", userId);
+              console.log("✅ Account created with ID:", userId);
+              showNotification("✅ Account created! Adding profile details...", "success");
 
               // If Patient, save patient details
               if (role === "PATIENT") {
@@ -434,7 +433,6 @@
                   active: true,
                 };
 
-                console.log("Patient data to send:", patientData);
                 const patientResponse = await fetch("/api/patients/register", {
                   method: "POST",
                   headers: {
@@ -442,14 +440,15 @@
                   },
                   body: JSON.stringify(patientData),
                 });
-                console.log("Patient registration response status:", patientResponse.status);
-                const patientResult = await patientResponse.json();
-                console.log("Patient registration result:", patientResult);
-                console.log("🔍 Patient response object:", JSON.stringify(patientResult, null, 2));
                 
                 if (!patientResponse.ok) {
-                  console.error("❌ Patient API Error:", patientResponse.status, patientResult);
+                  console.error("❌ Patient details registration failed:", patientResponse.status);
+                  showNotification("❌ Account created but profile details couldn't be saved. Try again.", "danger");
+                  registerBtn.disabled = false;
+                  registerBtn.classList.remove("loading");
+                  return;
                 }
+                showNotification("✅ Patient registration complete! Redirecting to login...", "success");
               }
               // If Doctor, save doctor details
               else if (role === "DOCTOR") {
@@ -459,21 +458,15 @@
                   email,
                   fullName,
                   phone,
-                  specialization:
-                    document.getElementById("specialization").value,
+                  specialization: document.getElementById("specialization").value,
                   department: document.getElementById("department").value,
                   licenseNumber: document.getElementById("licenseNumber").value,
-                  experience:
-                    document.getElementById("experience").value || "0",
-                  consultationFee:
-                    parseFloat(
-                      document.getElementById("consultationFee").value,
-                    ) || 0,
+                  experience: document.getElementById("experience").value || "0",
+                  consultationFee: parseFloat(document.getElementById("consultationFee").value) || 0,
                   availableSlots: [],
                   active: true,
                 };
 
-                console.log("Doctor data to send:", doctorData);
                 const doctorResponse = await fetch("/api/doctors/register", {
                   method: "POST",
                   headers: {
@@ -481,54 +474,32 @@
                   },
                   body: JSON.stringify(doctorData),
                 });
-                console.log("Doctor registration response status:", doctorResponse.status);
-                const doctorResult = await doctorResponse.json();
-                console.log("Doctor registration result:", doctorResult);
-                console.log("🔍 Doctor response object:", JSON.stringify(doctorResult, null, 2));
                 
                 if (!doctorResponse.ok) {
-                  console.error("❌ Doctor API Error:", doctorResponse.status, doctorResult);
+                  console.error("❌ Doctor details registration failed:", doctorResponse.status);
+                  showNotification("❌ Account created but professional details couldn't be saved. Try again.", "danger");
+                  registerBtn.disabled = false;
+                  registerBtn.classList.remove("loading");
+                  return;
                 }
+                showNotification("✅ Healthcare professional registration complete! Redirecting to login...", "success");
               }
 
-              showAlert(
-                alertDiv,
-                "✓ Registration successful! Redirecting to login...",
-                "success",
-              );
               setTimeout(() => {
                 window.location.href = "/login.html";
               }, 2000);
             } else {
-              showAlert(
-                alertDiv,
-                `${registerData.message || "Registration failed"}`,
-                "danger",
-              );
+              showNotification(`❌ Registration failed: ${registerData.message || "Unknown error"}`, "danger");
               registerBtn.disabled = false;
               registerBtn.classList.remove("loading");
             }
           } catch (error) {
             console.error("❌ Registration error:", error);
-            console.error("❌ Error stack:", error.stack);
-            console.error("❌ Full error object:", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-            showAlert(
-              alertDiv,
-              `An error occurred: ${error.message}`,
-              "danger",
-            );
+            showNotification(`❌ Network error: ${error.message}`, "danger");
             registerBtn.disabled = false;
             registerBtn.classList.remove("loading");
           }
         });
-
-      function showAlert(element, message, type) {
-        element.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-        element.classList.add("active");
-        setTimeout(() => {
-          element.classList.remove("active");
-        }, 5000);
-      }
 
       // Load role from URL parameter if provided
       window.addEventListener("load", () => {

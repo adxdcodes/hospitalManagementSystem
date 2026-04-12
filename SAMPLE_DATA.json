@@ -1,0 +1,303 @@
+{
+  "collections": {
+    "users": [
+      {
+        "email": "john.patient@hospital.com",
+        "password": "$2a$10$N9qo8uCoHEYjW2V6vEMt9OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW",
+        "fullName": "John Doe",
+        "phone": "+91-9876543210",
+        "role": "PATIENT",
+        "active": true,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      },
+      {
+        "email": "jane.doctor@hospital.com",
+        "password": "$2a$10$N9qo8uCoHEYjW2V6vEMt9OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW",
+        "fullName": "Dr. Jane Smith",
+        "phone": "+91-9876543211",
+        "role": "DOCTOR",
+        "active": true,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      },
+      {
+        "email": "admin@hospital.com",
+        "password": "$2a$10$N9qo8uCoHEYjW2V6vEMt9OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW",
+        "fullName": "Admin User",
+        "phone": "+91-9876543212",
+        "role": "ADMIN",
+        "active": true,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      },
+      {
+        "email": "priya.sharma@hospital.com",
+        "password": "$2a$10$N9qo8uCoHEYjW2V6vEMt9OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW",
+        "fullName": "Priya Sharma",
+        "phone": "+91-9876543220",
+        "role": "PATIENT",
+        "active": true,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      },
+      {
+        "email": "amit.patel@hospital.com",
+        "password": "$2a$10$N9qo8uCoHEYjW2V6vEMt9OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW",
+        "fullName": "Dr. Amit Patel",
+        "phone": "+91-9876543230",
+        "role": "DOCTOR",
+        "active": true,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      }
+    ],
+    "patients": [
+      {
+        "email": "john.patient@hospital.com",
+        "fullName": "John Doe",
+        "phone": "+91-9876543210",
+        "gender": "Male",
+        "dateOfBirth": "1990-05-15",
+        "address": "123 Main Street",
+        "city": "Mumbai",
+        "state": "Maharashtra",
+        "zipCode": "400001",
+        "bloodGroup": "O+",
+        "allergies": "Penicillin, Dairy",
+        "medicalHistory": [
+          "Hypertension",
+          "Type 2 Diabetes",
+          "Asthma"
+        ],
+        "active": true,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      },
+      {
+        "email": "priya.sharma@hospital.com",
+        "fullName": "Priya Sharma",
+        "phone": "+91-9876543220",
+        "gender": "Female",
+        "dateOfBirth": "1985-03-22",
+        "address": "456 Oak Avenue",
+        "city": "Delhi",
+        "state": "Delhi",
+        "zipCode": "110001",
+        "bloodGroup": "B+",
+        "allergies": "Sulfa drugs",
+        "medicalHistory": [
+          "Thyroid disorder",
+          "Iron deficiency"
+        ],
+        "active": true,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      },
+      {
+        "email": "rajesh.gupta@hospital.com",
+        "fullName": "Rajesh Gupta",
+        "phone": "+91-9876543240",
+        "gender": "Male",
+        "dateOfBirth": "1978-07-10",
+        "address": "789 Elm Street",
+        "city": "Bangalore",
+        "state": "Karnataka",
+        "zipCode": "560001",
+        "bloodGroup": "AB+",
+        "allergies": "Nuts",
+        "medicalHistory": [
+          "High cholesterol",
+          "Fatty liver"
+        ],
+        "active": true,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      }
+    ],
+    "doctors": [
+      {
+        "email": "jane.doctor@hospital.com",
+        "fullName": "Dr. Jane Smith",
+        "phone": "+91-9876543211",
+        "specialization": "Cardiology",
+        "department": "Heart Care",
+        "licenseNumber": "MCI/2015/20345",
+        "experience": "12 Years",
+        "consultationFee": 500.00,
+        "availableSlots": [
+          "09:00 AM",
+          "09:30 AM",
+          "10:00 AM",
+          "10:30 AM",
+          "02:00 PM",
+          "02:30 PM"
+        ],
+        "consultationHours": "Monday-Friday: 9:00 AM - 12:00 PM, 2:00 PM - 5:00 PM",
+        "address": "Medical Center Building, Floor 3",
+        "city": "Mumbai",
+        "active": true,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      },
+      {
+        "email": "amit.patel@hospital.com",
+        "fullName": "Dr. Amit Patel",
+        "phone": "+91-9876543230",
+        "specialization": "Neurology",
+        "department": "Neurology & Spine",
+        "licenseNumber": "MCI/2018/45678",
+        "experience": "8 Years",
+        "consultationFee": 750.00,
+        "availableSlots": [
+          "10:00 AM",
+          "10:30 AM",
+          "11:00 AM",
+          "03:00 PM",
+          "03:30 PM"
+        ],
+        "consultationHours": "Tuesday-Saturday: 10:00 AM - 1:00 PM, 3:00 PM - 6:00 PM",
+        "address": "Medical Center Building, Floor 4",
+        "city": "Mumbai",
+        "active": true,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      },
+      {
+        "email": "sarah.johnson@hospital.com",
+        "fullName": "Dr. Sarah Johnson",
+        "phone": "+91-9876543250",
+        "specialization": "Orthopedics",
+        "department": "Orthopedic Surgery",
+        "licenseNumber": "MCI/2017/33456",
+        "experience": "10 Years",
+        "consultationFee": 600.00,
+        "availableSlots": [
+          "08:00 AM",
+          "08:30 AM",
+          "09:00 AM",
+          "04:00 PM",
+          "04:30 PM"
+        ],
+        "consultationHours": "Monday, Wednesday, Friday: 8:00 AM - 11:00 AM, 4:00 PM - 7:00 PM",
+        "address": "Medical Center Building, Floor 2",
+        "city": "Mumbai",
+        "active": true,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      },
+      {
+        "email": "vikram.singh@hospital.com",
+        "fullName": "Dr. Vikram Singh",
+        "phone": "+91-9876543260",
+        "specialization": "General Medicine",
+        "department": "General Medicine",
+        "licenseNumber": "MCI/2016/54321",
+        "experience": "15 Years",
+        "consultationFee": 400.00,
+        "availableSlots": [
+          "09:00 AM",
+          "09:30 AM",
+          "10:00 AM",
+          "10:30 AM",
+          "11:00 AM",
+          "02:00 PM",
+          "02:30 PM",
+          "03:00 PM"
+        ],
+        "consultationHours": "Monday-Saturday: 9:00 AM - 12:00 PM, 2:00 PM - 5:00 PM",
+        "address": "Medical Center Building, Floor 1",
+        "city": "Mumbai",
+        "active": true,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      }
+    ],
+    "appointments": [
+      {
+        "patientId": "507f1f77bcf86cd799439021",
+        "doctorId": "507f1f77bcf86cd799439031",
+        "appointmentDate": "2026-04-20",
+        "appointmentTime": "10:00 AM",
+        "status": "SCHEDULED",
+        "reason": "Regular check-up and consultation",
+        "notes": "Patient complains of chest pain. Needs EKG.",
+        "department": "Cardiology",
+        "consultationFee": 500.00,
+        "reminded": false,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      },
+      {
+        "patientId": "507f1f77bcf86cd799439022",
+        "doctorId": "507f1f77bcf86cd799439032",
+        "appointmentDate": "2026-04-15",
+        "appointmentTime": "10:30 AM",
+        "status": "COMPLETED",
+        "reason": "Neurological evaluation",
+        "notes": "Patient doing well. Continue current medications.",
+        "department": "Neurology & Spine",
+        "consultationFee": 750.00,
+        "reminded": true,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      },
+      {
+        "patientId": "507f1f77bcf86cd799439021",
+        "doctorId": "507f1f77bcf86cd799439032",
+        "appointmentDate": "2026-04-25",
+        "appointmentTime": "02:00 PM",
+        "status": "SCHEDULED",
+        "reason": "Follow-up consultation",
+        "notes": "",
+        "department": "Cardiology",
+        "consultationFee": 500.00,
+        "reminded": false,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      },
+      {
+        "patientId": "507f1f77bcf86cd799439023",
+        "doctorId": "507f1f77bcf86cd799439033",
+        "appointmentDate": "2026-04-18",
+        "appointmentTime": "08:30 AM",
+        "status": "SCHEDULED",
+        "reason": "Knee pain and injury evaluation",
+        "notes": "MRI report attached. Possible meniscus tear.",
+        "department": "Orthopedic Surgery",
+        "consultationFee": 600.00,
+        "reminded": true,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      },
+      {
+        "patientId": "507f1f77bcf86cd799439022",
+        "doctorId": "507f1f77bcf86cd799439034",
+        "appointmentDate": "2026-04-22",
+        "appointmentTime": "09:30 AM",
+        "status": "SCHEDULED",
+        "reason": "General health check-up",
+        "notes": "Routine annual check-up. Blood test required.",
+        "department": "General Medicine",
+        "consultationFee": 400.00,
+        "reminded": false,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      },
+      {
+        "patientId": "507f1f77bcf86cd799439021",
+        "doctorId": "507f1f77bcf86cd799439034",
+        "appointmentDate": "2026-04-10",
+        "appointmentTime": "03:00 PM",
+        "status": "CANCELLED",
+        "reason": "Fever and general illness",
+        "notes": "Patient requested cancellation due to illness.",
+        "department": "General Medicine",
+        "consultationFee": 400.00,
+        "reminded": false,
+        "createdAt": 1712973600000,
+        "updatedAt": 1712973600000
+      }
+    ]
+  }
+}

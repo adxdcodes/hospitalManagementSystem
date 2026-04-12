@@ -31,8 +31,8 @@
                 <div class="card-header">
                     <h3 class="card-title">📅 Your Appointments</h3>
                 </div>
-                <button class="btn btn-primary" onclick="showAppointmentModal()">Book New Appointment</button>
-                <div id="appointmentsList" style="margin-top: 1rem;"></div>
+                <button class="btn btn-primary" onclick="bookNewAppointment()">Book New Appointment</button>
+                <div id="appointmentsList" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;"></div>
             </div>
 
             <div class="card">
@@ -52,14 +52,29 @@
             </div>
         </div>
 
+        <!-- Doctor Selection Modal -->
+        <div id="doctorSelectionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1002; overflow-y: auto;">
+            <div style="background: white; margin: 2% auto; padding: 2rem; width: 90%; max-width: 800px; border-radius: 0.5rem; position: relative; max-height: 90vh; overflow-y: auto;">
+                <h2>👨‍⚕️ Select a Doctor</h2>
+                <input type="text" id="doctorSearchInput" placeholder="Search by name or specialization..." style="width: 100%; padding: 0.75rem; margin: 1rem 0; border: 1px solid #ddd; border-radius: 0.5rem; font-size: 1rem; box-sizing: border-box;">
+                <div id="doctorsSelectionList" style="display: flex; gap: 1.5rem; margin: 1.5rem 0; max-height: 400px; overflow-x: auto; overflow-y: hidden; padding-bottom: 0.5rem;"></div>
+                <button type="button" class="btn btn-danger" onclick="closeModal('doctorSelectionModal')" style="width: 100%; margin-top: 1rem;">Cancel</button>
+            </div>
+        </div>
+
         <!-- Appointment Modal -->
-        <div id="appointmentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-            <div style="background: white; margin: 5% auto; padding: 2rem; width: 90%; max-width: 500px; border-radius: 0.5rem;">
+        <div id="appointmentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; overflow-y: auto;">
+            <div style="background: white; margin: 5% auto; padding: 2rem; width: 90%; max-width: 500px; border-radius: 0.5rem; position: relative;">
                 <h2>Book an Appointment</h2>
                 <form id="appointmentForm">
                     <div class="form-group">
-                        <label for="appointmentDoctor">Select Doctor</label>
-                        <select id="appointmentDoctor" required></select>
+                        <label for="appointmentDoctor">Selected Doctor</label>
+                        <div id="selectedDoctorInfo" style="background: #f8f9fa; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; font-weight: bold; color: #333;">
+                            <span id="selectedDoctorName">No doctor selected</span>
+                            <button type="button" class="btn btn-secondary" id="changeDoctorBtn" onclick="openDoctorSelection()" style="float: right; padding: 0.25rem 0.5rem; font-size: 0.9rem; display: none;">Change</button>
+                            <button type="button" class="btn btn-primary" id="selectDoctorBtn" onclick="openDoctorSelection()" style="float: right; padding: 0.25rem 0.5rem; font-size: 0.9rem;">Select Doctor</button>
+                        </div>
+                        <input type="hidden" id="appointmentDoctor" required>
                     </div>
                     <div class="form-group">
                         <label for="appointmentDate">Date</label>
@@ -80,8 +95,8 @@
         </div>
 
         <!-- Profile Modal -->
-        <div id="profileModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;">
-            <div style="background: white; margin: 2% auto; padding: 2rem; width: 90%; max-width: 500px; border-radius: 0.5rem;">
+        <div id="profileModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 998; overflow-y: auto;">
+            <div style="background: white; margin: 2% auto; padding: 2rem; width: 90%; max-width: 500px; border-radius: 0.5rem; position: relative; max-height: 90vh; overflow-y: auto;">
                 <h2>Edit Your Profile</h2>
                 <form id="profileForm">
                     <div class="form-group">
@@ -160,7 +175,30 @@
 
         function showAppointmentModal() {
             document.getElementById('appointmentModal').style.display = 'block';
+        }
+
+        function openDoctorSelection() {
+            document.getElementById('doctorSelectionModal').style.display = 'block';
             loadDoctorsForBooking();
+            document.getElementById('doctorSearchInput').value = '';
+        }
+
+        function bookNewAppointment() {
+            document.getElementById('appointmentForm').reset();
+            document.getElementById('appointmentDoctor').value = '';
+            document.getElementById('selectedDoctorName').textContent = 'No doctor selected';
+            document.getElementById('selectDoctorBtn').style.display = 'inline-block';
+            document.getElementById('changeDoctorBtn').style.display = 'none';
+            showAppointmentModal();
+            openDoctorSelection();
+        }
+
+        function selectDoctor(doctorId, doctorName, doctorSpecialization) {
+            document.getElementById('appointmentDoctor').value = doctorId;
+            document.getElementById('selectedDoctorName').textContent = `${doctorName} • ${doctorSpecialization}`;
+            document.getElementById('selectDoctorBtn').style.display = 'none';
+            document.getElementById('changeDoctorBtn').style.display = 'inline-block';
+            closeModal('doctorSelectionModal');
         }
 
         function showProfileModal() {
@@ -216,15 +254,15 @@
                 if (appointments.length === 0) {
                     appointmentsHTML = '<p style="color: var(--text-light);">No appointments yet. Book one now!</p>';
                 } else {
-                    appointmentsHTML = '<table><tr><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th><th>Action</th></tr>';
+                    appointmentsHTML = '<table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;"><tr style="border-bottom: 2px solid #ddd;"><th style="padding: 0.75rem; text-align: left;">Doctor</th><th style="padding: 0.75rem; text-align: left;">Date</th><th style="padding: 0.75rem; text-align: left;">Time</th><th style="padding: 0.75rem; text-align: left;">Status</th><th style="padding: 0.75rem; text-align: left;">Action</th></tr>';
                     appointments.forEach(apt => {
                         appointmentsHTML += `
-                            <tr>
-                                <td>${apt.doctorId}</td>
-                                <td>${apt.appointmentDate}</td>
-                                <td>${apt.appointmentTime}</td>
-                                <td><span style="background: var(--light-bg); padding: 0.25rem 0.5rem; border-radius: 0.25rem;">${apt.status}</span></td>
-                                <td>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 0.75rem;">${apt.doctorId}</td>
+                                <td style="padding: 0.75rem;">${apt.appointmentDate}</td>
+                                <td style="padding: 0.75rem;">${apt.appointmentTime}</td>
+                                <td style="padding: 0.75rem;"><span style="background: var(--light-bg); padding: 0.25rem 0.5rem; border-radius: 0.25rem;">${apt.status}</span></td>
+                                <td style="padding: 0.75rem;">
                                     ${apt.status === 'SCHEDULED' ? `<button class="btn btn-danger" onclick="cancelAppointment('${apt.id}')" style="padding: 0.5rem; font-size: 0.9rem;">Cancel</button>` : ''}
                                 </td>
                             </tr>
@@ -240,48 +278,114 @@
 
         async function loadDoctors() {
             try {
-                const response = await fetch('/api/doctors/active/all');
+                const response = await fetch('/api/doctors/all');
                 allDoctors = await response.json();
                 displayDoctors(allDoctors);
             } catch (error) {
                 console.error('Error loading doctors:', error);
+                showNotification('❌ Error loading doctors list', 'danger');
             }
         }
 
         function displayDoctors(doctors) {
             let doctorsHTML = '';
-            doctors.forEach(doctor => {
-                doctorsHTML += `
-                    <div class="card" style="margin-bottom: 1rem;">
-                        <h4>${doctor.fullName}</h4>
-                        <p><strong>Specialization:</strong> ${doctor.specialization}</p>
-                        <p><strong>Department:</strong> ${doctor.department}</p>
-                        <p><strong>Experience:</strong> ${doctor.experience}</p>
-                        <p><strong>Fee:</strong> $${doctor.consultationFee}</p>
-                        <button class="btn btn-primary" onclick="selectDoctorForBooking('${doctor.id}', '${doctor.fullName}')">Book Appointment</button>
-                    </div>
-                `;
-            });
+            if (doctors.length === 0) {
+                doctorsHTML = '<p style="color: var(--text-light);">No doctors found</p>';
+            } else {
+                doctorsHTML = '<div style="display: flex; gap: 1.5rem; overflow-x: auto; padding-right: 1rem; scroll-behavior: smooth;">';
+                doctors.forEach(doctor => {
+                    doctorsHTML += `
+                        <div style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 0.75rem; padding: 1.5rem; min-width: 320px; flex-shrink: 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                                <div>
+                                    <h4 style="margin: 0 0 0.25rem 0; color: #333; font-size: 1.1rem;">${doctor.fullName}</h4>
+                                    <p style="margin: 0; color: #667eea; font-weight: bold; font-size: 0.95rem;">${doctor.specialization}</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <p style="margin: 0; color: #28a745; font-weight: bold; font-size: 1.2rem;">$${doctor.consultationFee || 0}</p>
+                                    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #666;">per session</p>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+                                <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">🏥 <strong>${doctor.department || 'General'}</strong></p>
+                                <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">📅 <strong>${doctor.experience || 0} years experience</strong></p>
+                                <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">🎓 <strong>License: ${doctor.licenseNumber || 'N/A'}</strong></p>
+                            </div>
+                            <button class="btn btn-primary" onclick="bookWithDoctor('${doctor.id}', '${doctor.fullName}', '${doctor.specialization}')" style="width: 100%; margin-top: 1rem;">
+                                Book Appointment
+                            </button>
+                        </div>
+                    `;
+                });
+                doctorsHTML += '</div>';
+            }
             document.getElementById('doctorsList').innerHTML = doctorsHTML;
+        }
+
+        function bookWithDoctor(doctorId, doctorName, specialization) {
+            selectDoctor(doctorId, doctorName, specialization);
+            showAppointmentModal();
         }
 
         async function loadDoctorsForBooking() {
             try {
-                const response = await fetch('/api/doctors/active/all');
+                const response = await fetch('/api/doctors/all');
                 const doctors = await response.json();
-                let optionsHTML = '<option value="">-- Select a Doctor --</option>';
-                doctors.forEach(doctor => {
-                    optionsHTML += `<option value="${doctor.id}">${doctor.fullName} (${doctor.specialization})</option>`;
+                displayDoctorSelection(doctors);
+                
+                // Add search functionality
+                document.getElementById('doctorSearchInput').addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const filtered = doctors.filter(doc => 
+                        doc.fullName.toLowerCase().includes(searchTerm) || 
+                        doc.specialization.toLowerCase().includes(searchTerm) ||
+                        doc.department.toLowerCase().includes(searchTerm)
+                    );
+                    displayDoctorSelection(filtered);
                 });
-                document.getElementById('appointmentDoctor').innerHTML = optionsHTML;
             } catch (error) {
                 console.error('Error loading doctors:', error);
+                showNotification('❌ Error loading doctors', 'danger');
             }
         }
 
-        function selectDoctorForBooking(doctorId, doctorName) {
-            document.getElementById('appointmentDoctor').value = doctorId;
-            document.getElementById('appointmentModal').style.display = 'block';
+        function displayDoctorSelection(doctors) {
+            let doctorsHTML = '';
+            if (doctors.length === 0) {
+                doctorsHTML = '<p style="text-align: center; color: #999; padding: 2rem; width: 100%;">No doctors found matching your search.</p>';
+            } else {
+                doctors.forEach(doctor => {
+                    doctorsHTML += `
+                        <div style="background: white; border: 2px solid #ddd; border-radius: 0.75rem; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease; min-width: 300px; flex-shrink: 0;" 
+                             onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.2)'"
+                             onmouseout="this.style.borderColor='#ddd'; this.style.boxShadow='none'">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <h4 style="margin: 0 0 0.5rem 0; color: #333; font-size: 1.1rem;">${doctor.fullName}</h4>
+                                    <p style="margin: 0.25rem 0; color: #667eea; font-weight: bold; font-size: 0.95rem;">${doctor.specialization}</p>
+                                    <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">🏥 ${doctor.department || 'General'}</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <p style="margin: 0; color: #28a745; font-weight: bold; font-size: 1.1rem;">$${doctor.consultationFee || 0}</p>
+                                    <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.85rem;">per consultation</p>
+                                </div>
+                            </div>
+                            <div style="border-top: 1px solid #eee; margin: 1rem 0; padding-top: 1rem;">
+                                <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">
+                                    <strong>Experience:</strong> ${doctor.experience || 0} years
+                                </p>
+                                <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">
+                                    <strong>License:</strong> ${doctor.licenseNumber || 'N/A'}
+                                </p>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="selectDoctor('${doctor.id}', '${doctor.fullName}', '${doctor.specialization}')" style="width: 100%; margin-top: 1rem;">
+                                Select This Doctor
+                            </button>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('doctorsSelectionList').innerHTML = doctorsHTML;
         }
 
         async function cancelAppointment(appointmentId) {
@@ -302,13 +406,21 @@
 
         document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // Validate doctor selection
+            const doctorId = document.getElementById('appointmentDoctor').value;
+            if (!doctorId) {
+                showNotification('⚠️ Please select a doctor first', 'warning');
+                return;
+            }
+
             const user = JSON.parse(localStorage.getItem('user'));
             const patientResponse = await fetch(`/api/patients/user/${user.id}`);
             const patientData = await patientResponse.json();
 
             const appointmentData = {
                 patientId: patientData.id,
-                doctorId: document.getElementById('appointmentDoctor').value,
+                doctorId: doctorId,
                 appointmentDate: document.getElementById('appointmentDate').value,
                 appointmentTime: document.getElementById('appointmentTime').value,
                 reason: document.getElementById('appointmentReason').value
@@ -321,12 +433,20 @@
                     body: JSON.stringify(appointmentData)
                 });
                 if (response.ok) {
-                    alert('Appointment booked successfully!');
+                    showNotification('✅ Appointment booked successfully! Check your appointments.', 'success');
+                    document.getElementById('appointmentForm').reset();
+                    document.getElementById('appointmentDoctor').value = '';
+                    document.getElementById('selectedDoctorName').textContent = 'No doctor selected';
+                    document.getElementById('selectDoctorBtn').style.display = 'inline-block';
+                    document.getElementById('changeDoctorBtn').style.display = 'none';
                     closeModal('appointmentModal');
                     loadAppointments();
+                } else {
+                    const error = await response.json();
+                    showNotification(`❌ Failed to book appointment: ${error.message || 'Unknown error'}`, 'danger');
                 }
             } catch (error) {
-                alert('Error booking appointment: ' + error.message);
+                showNotification(`❌ Error: ${error.message}`, 'danger');
             }
         });
 
@@ -376,7 +496,9 @@
         document.getElementById('searchDoctor')?.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase();
             const filtered = allDoctors.filter(doc => 
-                doc.specialization.toLowerCase().includes(query)
+                doc.fullName.toLowerCase().includes(query) ||
+                doc.specialization.toLowerCase().includes(query) ||
+                (doc.department && doc.department.toLowerCase().includes(query))
             );
             displayDoctors(filtered);
         });
@@ -388,6 +510,9 @@
             }
             if (e.target.id === 'profileModal') {
                 closeModal('profileModal');
+            }
+            if (e.target.id === 'doctorSelectionModal') {
+                closeModal('doctorSelectionModal');
             }
         });
     </script>

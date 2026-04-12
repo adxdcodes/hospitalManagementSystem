@@ -24,15 +24,15 @@ public class AuthController {
         try {
             User user = userService.register(request);
             Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
+            response.put("success", true);  // Fixed: Return boolean, not string
             response.put("message", "Registration successful");
             response.put("userId", user.getId());
             response.put("email", user.getEmail());
             response.put("role", user.getRole());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("success", "false");
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);  // Fixed: Return boolean, not string
             error.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(error);
         }
@@ -57,8 +57,8 @@ public class AuthController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("success", "false");
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);  // Fixed: Return boolean, not string "false"
             error.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(error);
         }
